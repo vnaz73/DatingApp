@@ -3,6 +3,7 @@ using AutoMapper;
 using datingapp.api.Dtos;
 using DatingApp.Api.Dtos;
 using DatingApp.Api.Models;
+using DatingApp.API.Dtos;
 using DatingApp.API.Models;
 
 namespace DatingApp.Api.Helpers
@@ -30,6 +31,7 @@ namespace DatingApp.Api.Helpers
             CreateMap<UserForUpdateDto, User>();
             CreateMap<Photo, PhotoForReturnDto>();
             CreateMap<PhotoForCreationDto, Photo>();
+            CreateMap<UserForRegisterDto, User>();
         }
     }
 }

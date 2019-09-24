@@ -78,7 +78,7 @@ namespace datingapp.api.Controllers
                 photoForCreationDto.PublicId = uploadResult.PublicId;
                 var _photo = _mapper.Map<Photo>(photoForCreationDto);
 
-                if(userFromRepo.Photos.Any(u => u.IsMain))
+                if(userFromRepo.Photos.Count == 0 || userFromRepo.Photos.Any(u => u.IsMain))
                 {
                     _photo.IsMain = true;
                 }
