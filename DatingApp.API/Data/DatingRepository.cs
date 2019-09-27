@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using datingapp.api.Helpers;
+using datingapp.api.Models;
 using DatingApp.API.Data;
 using DatingApp.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,12 @@ namespace DatingApp.Api.Data
         public void Delete<T>(T entity) where T : class
         {
            _context.Remove(entity);
+        }
+
+        public async Task<Like> GetLike(int userId, int recipientId)
+        {
+            return await _context.Likes.FirstOrDefaultAsync(u =>
+             u.LikerId == userId && u.LikeeId == recipientId) ;  
         }
 
         public async Task<Photo> GetMainPhotoForUser(int userId)
@@ -59,7 +66,16 @@ namespace DatingApp.Api.Data
                 var MaxDob = DateTime.Now.AddYears(userParams.MinAge);
                 users = users.Where(u => u.DateOfBirth >= MinDob && u.DateOfBirth <= MaxDob);
             }
-
+            if(userParams.Likers)
+            {
+                var userLikers = await GetUserLikes(userParams.UserId, userParams.Likers);
+                users = users.Where(u => userLikers.Contains(u.Id));
+            }
+            if(userParams.Likees)
+            {
+                var userLikees = await GetUserLikes(userParams.UserId, userParams.Likers);
+                users = users.Where(u => userLikees.Contains(u.Id));
+            }
             if(!string.IsNullOrEmpty(userParams.OrderBy))
             {
                 switch(userParams.OrderBy){
@@ -75,10 +91,27 @@ namespace DatingApp.Api.Data
             }
             return await PagedList<User>.CreateSync(users, userParams.PageNumber, userParams.PageSize);
         }
+        private async Task<IEnumerable<int>> GetUserLikes(int id, bool likers)
+        {
+           var user = await _context.Users
+           .Include(x => x.Likers)
+           .Include(x => x.Likees) 
+           .FirstOrDefaultAsync(u => u.Id == id);
 
+           if(likers)
+           {
+               return user.Likers.Where(u => u.LikeeId == id).Select(i => i.LikerId);
+           }
+           else
+           {
+                return user.Likees.Where(u => u.LikerId == id).Select(i => i.LikeeId);
+           }
+        }
         public async Task<bool> SaveAll()
         {
            return await _context.SaveChangesAsync() > 0;
         }
+
+
     }
 }

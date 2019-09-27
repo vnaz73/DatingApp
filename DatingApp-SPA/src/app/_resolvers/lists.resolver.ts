@@ -8,15 +8,16 @@ import { catchError } from 'rxjs/operators';
 import { AlertifyService } from '../_services/alertify.service';
 
 @Injectable()
-export class MembersListResolver implements Resolve<User[]> {
+export class ListsResolver implements Resolve<User[]> {
     pageNumber = 1;
     pageSize = 5;
+    likes = 'Likers';
 
     constructor(private userService: UserService,
                 private router: Router, private alertify: AlertifyService) {}
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User[]> {
-        return this.userService.getUsers(this.pageNumber, this.pageSize).pipe(
+        return this.userService.getUsers(this.pageNumber, this.pageSize, null, this.likes).pipe(
             catchError(error => {
                 this.alertify.error('Error retrieving data');
                 this.router.navigate(['/home']);
